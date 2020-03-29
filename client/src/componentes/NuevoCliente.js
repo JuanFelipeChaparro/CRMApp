@@ -69,7 +69,6 @@ class NuevoCliente extends Component {
                                     crearCliente({
                                         variables: {input}
                                     });
-                                    
                                 }}>
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
