@@ -65,7 +65,7 @@ class NuevoCliente extends Component {
                                         this.setState({error: true});
                                         return;
                                     }
-                                   
+
                                     crearCliente({
                                         variables: {input}
                                     });
@@ -123,7 +123,7 @@ class NuevoCliente extends Component {
                                             <label>Correo {index + 1}:</label>
                                             <div className="input-group">
                                                 <input
-                                                    value={input.email}
+                                                    defaultValue={input.email}
                                                     type="email"
                                                     placeholder="Email"
                                                     className="form-control" 

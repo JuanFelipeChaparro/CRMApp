@@ -16,5 +16,11 @@ query ConsultarCliente($id: ID) {
         id
         nombre
         apellido
+        edad
+        empresa
+        tipo
+        emails {
+            email
+        }
     }
 }`;
