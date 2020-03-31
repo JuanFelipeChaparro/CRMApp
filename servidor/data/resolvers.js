@@ -1,10 +1,11 @@
-import { Clientes } from './db';
+import { Clientes, Productos } from './db';
 import { rejects } from 'assert';
 
 export const resolvers = {
     Query: {
-        getClientes: (root, {limite}) => {
-            return Clientes.find({}).limit(limite);
+        // Clientes
+        getClientes: (root, {limite, offset}) => {
+            return Clientes.find({}).limit(limite).skip(offset);
         },
         getCliente: (root, {id}) => {
             return new Promise((resolve, object) => {
@@ -13,9 +14,31 @@ export const resolvers = {
                     else resolve(cliente)
                 });
             });
+        },
+        totalClientes : (root) => {
+            return new Promise((resolve, object) => {
+                Clientes.countDocuments({}, (error, count) => {
+                    if (error) rejects(error)
+                    else resolve(count)
+                })
+            });
+        },
+
+        // Productos
+        obtenerProductos: (root, {limite, offset}) => {
+            return Productos.find({}).limit(limite).skip(offset);
+        },
+        obtenerProducto: (root, {id}) => {
+            return new Promise((resolve, object) => {
+                Productos.findById(id, (error, producto) => {
+                    if (error) rejects(error)
+                    else resolve(producto)
+                });
+            });
         }
     },
     Mutation: {
+        // Clientes
         crearCliente: (root, {input}) => {
             const nuevoCliente = new Clientes({
                 nombre : input.nombre,
@@ -46,7 +69,41 @@ export const resolvers = {
         },
         eliminarCliente: (root, {id}) => {
             return new Promise((resolve, object) => {
-                Clientes.findOneAndRemove({_id: id}, (error) => {
+                Clientes.findOneAndDelete({_id: id}, (error) => {
+                    if (error) rejects(error)
+                    else resolve("Eliminado Correctamente")
+                });
+            });
+        },
+
+        // Productos
+        nuevoProducto: (root, {input}) => {
+            const nuevoProducto = new Productos({
+                nombre: input.nombre,
+                precio: input.precio,
+                stock: input.stock
+            });
+
+            nuevoProducto.id = nuevoProducto._id;
+
+            return new Promise((resolve, object) => {
+                nuevoProducto.save((error) => {
+                    if (error) rejects(error)
+                    else resolve(nuevoProducto)
+                });
+            });
+        },
+        actualizarProducto: (root, {input}) => {
+            return new Promise((resolve, object) => {
+                Productos.findOneAndUpdate({_id: input.id}, input, {new: true}, (error, producto) => {
+                    if (error) rejects(error)
+                    else resolve(producto)
+                });
+            });
+        },
+        eliminarProducto: (root, {id}) => {
+            return new Promise((resolve, object) => {
+                Productos.findOneAndDelete({_id: id}, (error) => {
                     if (error) rejects(error)
                     else resolve("Eliminado Correctamente")
                 });

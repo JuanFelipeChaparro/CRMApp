@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { mongo } from 'mongoose';
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/clientes', {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
@@ -13,6 +13,13 @@ const clientesSchema = new mongoose.Schema({
     pedidos : Array
 });
 
-const Clientes = mongoose.model('clientes', clientesSchema);
+const productosSchema = new mongoose.Schema({
+    nombre : String,
+    precio : Number,
+    stock : Number
+});
 
-export {Clientes};
+const Clientes = mongoose.model('clientes', clientesSchema);
+const Productos = mongoose.model('productos', productosSchema);
+
+export { Clientes, Productos };
