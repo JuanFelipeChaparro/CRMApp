@@ -66,6 +66,7 @@ type Query {
     # Productos
     obtenerProductos(limite: Int, offset: Int): [Producto]
     obtenerProducto(id: ID!): Producto
+    totalProductos: Int
 }
 
 type Mutation {
