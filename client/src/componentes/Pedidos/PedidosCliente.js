@@ -9,7 +9,7 @@ const PedidosCliente = ({match: {params: {id}}}) => (
         <h2 className="text-center mb-5">Pedidos del Cliente</h2>
         <div className="row">
             <Query query={PEDIDOS_QUERY} variables={{cliente: id}}>
-                {({loading, error, data}) => {
+                {({loading, error, data, refetch}) => {
                     if (loading)
                         return (
                             <div className="spinner">
@@ -26,7 +26,8 @@ const PedidosCliente = ({match: {params: {id}}}) => (
                             <Pedido 
                                 key={pedido.id}
                                 pedido={pedido}
-                                cliente={id} />
+                                cliente={id} 
+                                refetch={refetch}/>
                         ))
                     );
                 }}

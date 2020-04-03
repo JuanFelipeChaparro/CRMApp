@@ -60,3 +60,20 @@ query obtenerPedidos($cliente: String!) {
         }
     }
 }`;
+
+export const TOP_CLIENTES = gql`
+query topClientes {
+    topClientes {
+        total
+        cliente {
+            nombre
+        }
+    }
+}`;
+
+export const USUARIO_ACTUAL = gql`
+query obtenerUsuario {
+    obtenerUsuario {
+        usuario
+    }
+}`;

@@ -4,12 +4,19 @@ import { PRODUCTO_QUERY } from '../../queries';
 import { ACTUALIZAR_PEDIDO } from '../../mutations';
 import ResumenProducto from './ResumenProducto';
 
-const Pedido = ({pedido, cliente}) => (
+const claseEstado = estado => {
+    if (estado === "PENDIENTE") return "border-light";
+    if (estado === "CANCELADO") return "border-danger";
+    if (estado === "COMPLETADO") return "border-success";
+    
+}
+
+const Pedido = ({pedido, cliente, refetch}) => (
     <div className="col-md-4">
-        <div className={`card mb-3`} >
+        <div className={`card mb-3 ${claseEstado(pedido.estado)}`} >
             <div className="card-body">
                 <p className="card-text font-weight-bold ">Estado:
-                    <Mutation mutation={ACTUALIZAR_PEDIDO}>
+                    <Mutation mutation={ACTUALIZAR_PEDIDO} onCompleted={() => refetch()}>
                         {actualizarPedido => (
                             <select 
                                 className="form-control my-3" 
