@@ -52,6 +52,10 @@ class Clientes extends Component {
                                             {item.nombre} {item.apellido} - {item.empresa}
                                         </div>
                                         <div className="col-md-4 d-flex justify-content-end">
+                                            <Link to={`/pedidos/nuevo/${item.id}`} className="btn btn-warning d-block d-md-inline-block mr-2">Nuevo Pedido</Link>
+
+                                            <Link to={`/pedidos/${item.id}`} className="btn btn-primary d-block d-md-inline-block mr-2">Ver Pedidos</Link>
+
                                             <Mutation mutation={ELIMINAR_CLIENTE} onCompleted={() => refetch()}>
                                                 {eliminarCliente => (
                                                     <button 
@@ -66,10 +70,11 @@ class Clientes extends Component {
                                                                 });
                                                             }
                                                         }}>
-                                                        &times; Eliminar
+                                                        Eliminar
                                                     </button>
                                                 )}
                                             </Mutation>
+
                                             <Link to={`/cliente/editar/${item.id}`} className="btn btn-success d-block d-md-inline-block">Editar Cliente</Link>
                                         </div>
                                     </div>
