@@ -33,6 +33,19 @@ type PedidoProducto {
     cantidad: Int
 }
 
+type ClienteTotal {
+    total: Float
+    cliente: [Cliente]
+}
+
+type Token {
+    token: String
+}
+
+type Usuario {
+    usuario: String
+}
+
 enum TipoCliente {
     BASICO
     PREMIUM
@@ -93,6 +106,12 @@ type Query {
 
     # Pedidos
     obtenerPedidos(cliente: String!): [Pedido]
+
+    # Graficas
+    topClientes: [ClienteTotal]
+
+    # Usuarios
+    obtenerUsuario: Usuario
 }
 
 type Mutation {
@@ -109,4 +128,8 @@ type Mutation {
     # Pedidos
     nuevoPedido(input: PedidoInput): Pedido
     actualizarPedido(input: PedidoInput): Pedido
+
+    # Usuarios
+    crearUsuario(usuario: String!, password: String!): String
+    autenticarUsuario(usuario: String!, password: String!): Token
 }

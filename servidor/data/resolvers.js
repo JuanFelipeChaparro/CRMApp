@@ -1,5 +1,15 @@
-import { Clientes, Productos, Pedidos } from './db';
+import { Clientes, Productos, Pedidos, Usuarios } from './db';
 import { rejects } from 'assert';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+
+dotenv.config({path: 'variables.env'});
+
+const crearToken = (usuarioLogin, secreto, expiresIn) => {
+    const { usuario } = usuarioLogin;
+    return jwt.sign({usuario}, secreto, {expiresIn});
+};
 
 export const resolvers = {
     Query: {
@@ -59,6 +69,41 @@ export const resolvers = {
                     else resolve(pedidos)
                 });
             });
+        },
+
+        // Graficas
+        topClientes: (root) => {
+            return new Promise((resolve, object) => {
+                Pedidos.aggregate([
+                    {
+                        $match: {estado: "COMPLETADO"}
+                    },
+                    {
+                        $group: {_id: "$cliente", total: {$sum: "$total"}}
+                    },
+                    {
+                        $lookup: {from: "clientes", localField: "_id", foreignField: "_id", as: "cliente"}
+                    },
+                    {
+                        $sort: {total: -1}
+                    },
+                    {
+                        $limit: 10
+                    }
+                ], (error, resultado) => {
+                    if (error) rejects(error)
+                    else resolve(resultado)
+                });
+            });
+        },
+
+        //Usuarios
+        obtenerUsuario: (root, args, {usuarioActual}) => {
+            if (!usuarioActual) {
+                return null;
+            }
+
+            return Usuarios.findOne({usuario: usuarioActual.usuario});
         }
     },
     Mutation: {
@@ -147,17 +192,6 @@ export const resolvers = {
             nuevoPedido.id = nuevoPedido._id;
 
             return new Promise((resolve, object) => {
-
-                input.pedido.forEach(pedido => {
-                    Productos.updateOne({_id: pedido.id}, {
-                        "$inc" : {
-                            "stock" : -pedido.cantidad
-                        }
-                    }, (error) => {
-                        if (error) return new Error(error);
-                    });
-                });
-
                 nuevoPedido.save((error) => {
                     if (error) rejects(error)
                     else resolve(nuevoPedido)
@@ -166,11 +200,64 @@ export const resolvers = {
         },
         actualizarPedido: (root, {input}) => {
             return new Promise((resolve, object) => {
+                const { estado } = input;
+                let instruccion = '';
+
+                if (estado === "COMPLETADO") {
+                    instruccion = "-";
+                } else if (estado === "CANCELADO") {
+                    instruccion = "+";
+                }
+
+                input.pedido.forEach(pedido => {
+                    Productos.updateOne({_id: pedido.id}, {
+                        "$inc" : {
+                            "stock" : `${instruccion}${pedido.cantidad}`
+                        }
+                    }, (error) => {
+                        if (error) return new Error(error);
+                    });
+                });
+
                 Pedidos.findOneAndUpdate({_id: input.id}, input, {new: true}, (error, pedido) => {
                     if (error) rejects(error)
                     else resolve(pedido)
                 });
             });
+        },
+
+        // Usuarios
+        crearUsuario: async(root, {usuario, password}) => {
+            const existe = await Usuarios.findOne({usuario});
+
+            if (existe) {
+                throw new Error('El usuario ya existe');
+                
+            } else {
+                const nuevoUsuario = await new Usuarios({
+                    usuario,
+                    password
+                }).save();
+
+                return "Usuario creado";
+            }
+        },
+        autenticarUsuario: async(root, {usuario, password}) => {
+            const nombreUsuario = await Usuarios.findOne({usuario});
+            
+            if (!nombreUsuario) {
+                throw new Error('Usuario no encontrado');
+            } 
+
+            const passwordCorrecto = await bcrypt.compare(password, nombreUsuario.password);
+
+            if (!passwordCorrecto) {
+                throw new Error('Password incorrecto');
+            }
+
+            return {
+                token: crearToken(nombreUsuario, process.env.SECRETO, '1hr')
+            };
         }
     }
 };
